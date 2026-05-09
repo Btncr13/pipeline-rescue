@@ -3,3 +3,14 @@
 target/
 dbt_packages/
 logs/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.env
+
+# Archivos de datos locales (NUNCA subir CSVs crudos a Git)
+*.csv
+*.gz

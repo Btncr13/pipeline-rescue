@@ -5,19 +5,19 @@ print("Conectando a Snowflake...")
 
 # 1. TUS DATOS DE CONEXIÓN EXACTOS
 conn = snowflake.connector.connect(
-    account="TU_ACCOUNT_ID_AQUI",
-    user="TU_USUARIO_AQUI",
-    password="TU_CONTRASEÑA_AQUI",
+    account="PGZQVEH-TU13834",
+    user="Betancor13bis",
+    password="z:xkEX-D6qAPePy", 
 )
 cursor = conn.cursor()
 
-# 2. CONFIGURACIÓN DEL ENTORNO (Usamos la capa que creamos antes)
+# 2. CONFIGURACIÓN DEL ENTORNO
 cursor.execute("USE ROLE ACCOUNTADMIN")
 cursor.execute("USE WAREHOUSE COMPUTE_WH")
 cursor.execute("USE DATABASE DEV_BRONZE")
 cursor.execute("USE SCHEMA RAW")
 
-# Creamos la "carpeta" temporal en Snowflake si no existe
+# Creamos la "carpeta" temporal en Snowflake
 cursor.execute("CREATE STAGE IF NOT EXISTS STAGE_INGESTA_LOCAL")
 
 # 3. BUSCAMOS LOS ARCHIVOS EN TU ESCRITORIO
@@ -36,44 +36,57 @@ archivos_tablas = {
 
 print(f"\nBuscando CSVs en: {ruta_carpeta}\n" + "-"*40)
 
-# 4. EL BUCLE QUE HACE TODO EL TRABAJO
+# 4. EL BUCLE INCREMENTAL (PRODUCCIÓN)
 for archivo, tabla in archivos_tablas.items():
     ruta_completa = os.path.join(ruta_carpeta, archivo)
     
     if os.path.exists(ruta_completa):
-        print(f"Subiendo {archivo}...")
-        
-        # Adaptamos la ruta para que Snowflake la entienda (barras hacia adelante)
+        print(f"Procesando {archivo}...")
         ruta_sql = ruta_completa.replace("\\", "/")
         
         try:
-            # Asegurar columna de Auditoría ---
-            # Si la tabla ya existe, le añade la columna si no la tiene.
-            # El DEFAULT asegura que cada fila nueva reciba la hora actual automáticamente.
-            cursor.execute(f"""
-                ALTER TABLE {tabla} 
-                ADD COLUMN IF NOT EXISTS _INGESTED_AT TIMESTAMP_NTZ 
-                DEFAULT CURRENT_TIMESTAMP()
-            """)
-            
-            # Paso 1: Subir el archivo (PUT)
+            # A. Subimos el archivo al Stage
             cursor.execute(f"PUT 'file://{ruta_sql}' @STAGE_INGESTA_LOCAL OVERWRITE = TRUE")
-            
-            # Paso 2: Volcarlo en la tabla (COPY INTO) a prueba de balas
+
+            # B. Creamos la tabla SOLO si no existe (Inferencia de esquema)
             cursor.execute(f"""
-            COPY INTO {tabla}
-            FROM @STAGE_INGESTA_LOCAL/{archivo}.gz
-            FILE_FORMAT = (TYPE = 'CSV' SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '"')
-            ON_ERROR = 'CONTINUE'
+                CREATE TABLE IF NOT EXISTS {tabla}
+                USING TEMPLATE (
+                    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
+                    FROM TABLE(
+                        INFER_SCHEMA(
+                            LOCATION=>'@STAGE_INGESTA_LOCAL/{archivo}.gz',
+                            FILE_FORMAT=>'FORMATO_CSV_GENERAL'
+                        )
+                    )
+                )
             """)
-            print(f"✅ ¡{tabla} lista!")
+
+            # C. Aseguramos que exista la columna técnica sin romper si ya existe de ayer
+            cursor.execute(f"ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS _LOADED_AT TIMESTAMP_NTZ")
+
+            # D. Volcamos los datos (Snowflake sabe qué archivos ya procesó y no duplica a lo loco)
+            cursor.execute(f"""
+                COPY INTO {tabla}
+                FROM @STAGE_INGESTA_LOCAL/{archivo}.gz
+                FILE_FORMAT = (FORMAT_NAME = 'FORMATO_CSV_GENERAL')
+                MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+                ON_ERROR = 'CONTINUE'
+            """)
+
+            # E. Estampamos la hora exacta SOLO a los registros que acaban de entrar sin fecha
+            cursor.execute(f"UPDATE {tabla} SET _LOADED_AT = CURRENT_TIMESTAMP() WHERE _LOADED_AT IS NULL")
+            
+            print(f"✅ ¡{tabla} procesada con éxito en modo incremental!")
             
         except Exception as e:
-            print(f"⚠️ Hubo un problema menor con {archivo}: {e}")
+            print(f"⚠️ Error al procesar {archivo}: {e}")
+            
     else:
-        print(f"❌ No encuentro el archivo {archivo} en la carpeta.")
+        print(f"❌ No se encontró el archivo: {archivo}")
 
-# Cerramos las conexiones
 cursor.close()
 conn.close()
-print("-" * 40 + "\n¡Carga terminada!")
+
+print("-" * 40 + "\n🎯 ¡Carga de Producción finalizada!")
+input("Presiona ENTER para salir...")
