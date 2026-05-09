@@ -47,6 +47,15 @@ for archivo, tabla in archivos_tablas.items():
         ruta_sql = ruta_completa.replace("\\", "/")
         
         try:
+            # Asegurar columna de Auditoría ---
+            # Si la tabla ya existe, le añade la columna si no la tiene.
+            # El DEFAULT asegura que cada fila nueva reciba la hora actual automáticamente.
+            cursor.execute(f"""
+                ALTER TABLE {tabla} 
+                ADD COLUMN IF NOT EXISTS _INGESTED_AT TIMESTAMP_NTZ 
+                DEFAULT CURRENT_TIMESTAMP()
+            """)
+            
             # Paso 1: Subir el archivo (PUT)
             cursor.execute(f"PUT 'file://{ruta_sql}' @STAGE_INGESTA_LOCAL OVERWRITE = TRUE")
             
