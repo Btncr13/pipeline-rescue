@@ -1,7 +1,7 @@
 version: 2                                        # Versión del estándar de dbt
 
 sources:                                          # Inicio de la definición de fuentes
-  - name: raw                                     # Nombre lógico de la fuente para dbt
+  - name: rescue                                  # Nombre lógico de la fuente para dbt
     database: DEV_BRONZE                          # Base de datos en Snowflake
     schema: RAW                                   # Esquema en Snowflake
 

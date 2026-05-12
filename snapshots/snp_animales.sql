@@ -18,7 +18,7 @@ with source_data as (               -- Creamos una CTE para generar la columna a
             'nombre', 
             'fecha_nacimiento_estimada'
         ]) }} as animal_key
-    from {{ source('raw', 'animales') }}
+    from {{ source('rescue', 'animales') }}
 )
 
 select * from source_data
