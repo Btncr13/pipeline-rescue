@@ -3,88 +3,73 @@ import os
 
 print("Conectando a Snowflake...")
 
-# 1. TUS DATOS DE CONEXIÓN EXACTOS
+# DATOS DE CONEXIÓN EXACTOS
 conn = snowflake.connector.connect(
-    account="PGZQVEH-TU13834",
-    user="Betancor13bis",
-    password="z:xkEX-D6qAPePy", 
+    account="SNOWFLAKE_ACCOUNT",
+    user="SNOWFLAKE_USER",
+    password="SNOWFLAKE_PASSWORD",
+    warehouse="COMPUTE_WH",
+    database="DEV_BRONZE",
+    schema="RAW"
 )
 cursor = conn.cursor()
 
-# 2. CONFIGURACIÓN DEL ENTORNO
-cursor.execute("USE ROLE ACCOUNTADMIN")
-cursor.execute("USE WAREHOUSE COMPUTE_WH")
-cursor.execute("USE DATABASE DEV_BRONZE")
-cursor.execute("USE SCHEMA RAW")
-
-# Creamos la "carpeta" temporal en Snowflake
+# Asegura que el Stage existe
 cursor.execute("CREATE STAGE IF NOT EXISTS STAGE_INGESTA_LOCAL")
 
-# 3. BUSCAMOS LOS ARCHIVOS EN TU ESCRITORIO
+# BUSCAS LOS ARCHIVOS
 escritorio = os.path.join(os.path.expanduser("~"), "Desktop")
 ruta_carpeta = os.path.join(escritorio, "Rescue_animal")
 
-archivos_tablas = {
-    "adopters.csv": "ADOPTERS",
-    "animales.csv": "ANIMALES",
-    "donations.csv": "DONATIONS",
-    "movimientos.csv": "MOVIMIENTOS",
-    "sedes.csv": "SEDES",
-    "visitas_medicas.csv": "VISITAS_MEDICAS",
-    "zip_codes.csv": "ZIP_CODES"
-}
-
 print(f"\nBuscando CSVs en: {ruta_carpeta}\n" + "-"*40)
 
-# 4. EL BUCLE INCREMENTAL (PRODUCCIÓN)
-for archivo, tabla in archivos_tablas.items():
+# BUCLE AUTOMÁTICO DE CARGA RAW
+# Iteramos sobre todos los elementos (archivos/carpetas) que existan en la ruta indicada
+for archivo in os.listdir(ruta_carpeta):
+    # Filtro de seguridad: si el archivo no termina en .csv, lo saltamos y pasamos al siguiente
+    if not archivo.endswith('.csv'):
+        continue
+        
+    # Deducimos el nombre de la tabla eliminando la extensión '.csv' y convirtiendo a MAYÚSCULAS
+    # Ejemplo: 'adopters.csv' -> 'ADOPTERS'
+    tabla = archivo.replace('.csv', '').upper()
+    
+    # Construimos la ruta absoluta del archivo en nuestra máquina local
     ruta_completa = os.path.join(ruta_carpeta, archivo)
     
-    if os.path.exists(ruta_completa):
-        print(f"Procesando {archivo}...")
-        ruta_sql = ruta_completa.replace("\\", "/")
+    # Snowflake requiere que las rutas de los archivos locales usen barras inclinadas hacia adelante '/'
+    # Por defecto, Windows usa '\', así que hacemos el reemplazo para evitar errores de sintaxis
+    ruta_sql = ruta_completa.replace("\\", "/")
+    
+    print(f"Procesando {archivo} en la tabla {tabla}...")
+    
+    try:
+        # 1. Subimos el archivo al Stage
+        cursor.execute(f"PUT 'file://{ruta_sql}' @STAGE_INGESTA_LOCAL OVERWRITE = TRUE")
+
+        # 2. Vaciamos la tabla para que no se dupliquen filas si relanzamos el script
+        cursor.execute(f"TRUNCATE TABLE {tabla}")
+
+        # 3. Copiamos los datos (Tu lógica original que funcionaba)
+        cursor.execute(f"""
+            COPY INTO {tabla}
+            FROM @STAGE_INGESTA_LOCAL/{archivo}.gz
+            FILE_FORMAT = (FORMAT_NAME = 'FORMATO_CSV_GENERAL')
+            MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+            ON_ERROR = 'CONTINUE'
+            PURGE = TRUE
+        """)
+
+        # 4. Sello de tiempo para la auditoría técnica
+        cursor.execute(f"UPDATE {tabla} SET _loaded_at = CURRENT_TIMESTAMP() WHERE _loaded_at IS NULL")
+
+        print(f"✅ ¡{tabla} cargada con éxito y sin duplicados!")
         
-        try:
-            # A. Subimos el archivo al Stage
-            cursor.execute(f"PUT 'file://{ruta_sql}' @STAGE_INGESTA_LOCAL OVERWRITE = TRUE")
+    except Exception as e:
+        print(f"⚠️ Error al procesar {archivo}: {e}")
 
-            # B. Creamos la tabla SOLO si no existe (Inferencia de esquema)
-            cursor.execute(f"""
-                CREATE TABLE IF NOT EXISTS {tabla}
-                USING TEMPLATE (
-                    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
-                    FROM TABLE(
-                        INFER_SCHEMA(
-                            LOCATION=>'@STAGE_INGESTA_LOCAL/{archivo}.gz',
-                            FILE_FORMAT=>'FORMATO_CSV_GENERAL'
-                        )
-                    )
-                )
-            """)
-
-            # C. Aseguramos que exista la columna técnica sin romper si ya existe de ayer
-            cursor.execute(f"ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS _LOADED_AT TIMESTAMP_NTZ")
-
-            # D. Volcamos los datos (Snowflake sabe qué archivos ya procesó y no duplica a lo loco)
-            cursor.execute(f"""
-                COPY INTO {tabla}
-                FROM @STAGE_INGESTA_LOCAL/{archivo}.gz
-                FILE_FORMAT = (FORMAT_NAME = 'FORMATO_CSV_GENERAL')
-                MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
-                ON_ERROR = 'CONTINUE'
-            """)
-
-            # E. Estampamos la hora exacta SOLO a los registros que acaban de entrar sin fecha
-            cursor.execute(f"UPDATE {tabla} SET _LOADED_AT = CURRENT_TIMESTAMP() WHERE _LOADED_AT IS NULL")
-            
-            print(f"✅ ¡{tabla} procesada con éxito en modo incremental!")
-            
-        except Exception as e:
-            print(f"⚠️ Error al procesar {archivo}: {e}")
-            
-    else:
-        print(f"❌ No se encontró el archivo: {archivo}")
-
+# CIERRE DE CONEXIONES
+# Es vital cerrar el cursor y la conexión para liberar los recursos de red y memoria.
 cursor.close()
 conn.close()
 
