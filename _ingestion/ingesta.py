@@ -1,13 +1,16 @@
 import snowflake.connector
 import os
+from dotenv import load_dotenv # <-- 1. Importamos esto para leer el archivo .env
 
 print("Conectando a Snowflake...")
 
+load_dotenv() # <-- 2. Esta función busca el archivo .env y carga las contraseñas en memoria
+
 # DATOS DE CONEXIÓN EXACTOS
 conn = snowflake.connector.connect(
-    account="SNOWFLAKE_ACCOUNT",
-    user="SNOWFLAKE_USER",
-    password="SNOWFLAKE_PASSWORD",
+    account=os.getenv("SNOWFLAKE_ACCOUNT"),   # <-- 3. Usamos os.getenv() sin comillas dentro
+    user=os.getenv("SNOWFLAKE_USER"),
+    password=os.getenv("SNOWFLAKE_PASSWORD"),
     warehouse="COMPUTE_WH",
     database="DEV_BRONZE",
     schema="RAW"
