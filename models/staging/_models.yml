@@ -2,21 +2,21 @@ version: 2
 
 models:
   - name: stg_rescue__animales
-    description: "Capa Staging de animales. Estandarización de especies, cruce de razas y validación de reglas biológicas (peso/edad)."
+    description: "Capa Staging de animales. Estandarización de especies, cruce de razas y validación de reglas biológicas (peso/edad)"
     columns:
       - name: animal_key
-        description: "Clave primaria única de la tabla creada con md5."
+        description: "Clave primaria única de la tabla creada con md5"
         tests:
           - unique
           - not_null
 
       - name: animal_id
-        description: "ID original del sistema de origen."
+        description: "ID original del sistema de origen"
         tests:
           - not_null
 
       - name: especie_animal
-        description: "Especie del animal corregida y estandarizada."
+        description: "Especie del animal corregida y estandarizada"
         tests:
           - not_null
           - accepted_values:
@@ -24,7 +24,7 @@ models:
               quote: true
 
       - name: raza_animal
-        description: "Raza del animal limpia tras cruzar con la Seed."
+        description: "Raza del animal limpia tras cruzar con la Seed"
         tests:
           - not_null
 
@@ -37,3 +37,78 @@ models:
               quote: true
 
       # No ponemos 'not_null' en fecha_nacimiento o peso_kg porque las convertimos a null si eran inválidas.
+
+  - name: stg_rescue__usuarios
+    description: "Capa Staging de usuarios deduplicada por Email, Teléfono y Nombre. Incluye validación de rangos de edad"
+    columns:
+      - name: user_key
+        data_type: varchar
+        description: "Clave primaria única de la tabla creada con md5"
+        tests:
+          - unique
+          - not_null
+
+      - name: user_id
+        data_type: varchar
+        description: "iID original proveniente del sistema de gestión del refugio"
+
+      - name: nombre_completo
+        data_type: varchar
+        description: "Nombre y apellidos del usuario"
+        tests:
+          - not_null
+
+      - name: genero_usuario
+        data_type: varchar
+        description: "Sexo del usuario"
+        tests:
+          - accepted_values:
+              values: ['MASCULINO', 'FEMENINO', 'DESCONOCIDO']
+
+      - name: fecha_nacimiento
+        data_type: date
+        description: "fecha de nacimiento del usuario"
+
+      - name: email
+        data_type: varchar
+        description: "email de los usuarios"
+        tests:
+          - dbt_utils.at_least_one        # Opcional: para asegurar que no todos son nulos
+
+      - name: telefono
+        data_type: varchar
+        description: "Número de teléfono normalizado a 9 dígitos"
+
+      - name: codigo_postal
+        data_type: varchar
+        description: "Código postal español validado"
+
+      - name: profesion
+        data_type: varchar
+        description: "Profesión declarada por el usuario"
+
+      - name: tipo_usuario
+        data_type: varchar
+        description: "Rol principal del usuario en el sistema"
+        tests:
+          - accepted_values:
+              values: ['ADOPTANTE', 'VOLUNTARIO', 'DONANTE', 'SIN TIPO']
+              quote: true
+
+      - name: canal_captacion
+        data_type: varchar
+        description: "Origen por el cual el usuario conoció la protectora"
+
+      - name: es_socio
+        data_type: boolean
+        description: "Indicador booleano (TRUE/FALSE)"
+        tests:
+          - not_null
+
+      - name: fecha_alta_at
+        data_type: date
+        description: "Fecha en la que el usuario se registró por primera vez"
+
+      - name: ingested_at
+        data_type: timestamp_ntz
+        description: "Timestamp técnico de cuándo se cargó el dato en la capa Bronze"
