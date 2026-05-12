@@ -34,6 +34,12 @@ cleaned_base as (
 
         upper(trim(s.raza)) as raza_bruta,
         coalesce(upper(trim(s.color)), 'DESCONOCIDO') as color_animal,
+        
+        case 
+            when upper(trim(s.genero)) in ('H', 'HEMBRA', 'FEMENINO', 'F') then 'HEMBRA'
+            when upper(trim(s.genero)) in ('M', 'MACHO', 'MASCULINO') then 'MACHO'
+            else 'DESCONOCIDO'
+        end as sexo_animal,
 
         -- 2. Validación de Fecha de Nacimiento (Calendario + Futuro)
         case 
@@ -68,6 +74,7 @@ final_model as (
         coalesce(m.raza_limpia, b.raza_bruta, 'DESCONOCIDO') as raza_animal,
 
         b.color_animal,
+        b.sexo_animal,
 
         -- Validación de Edad Máxima (Seed 2)
         case 

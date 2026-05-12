@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_rescue__animales
+    description: "Capa Staging de animales. Estandarización de especies, cruce de razas y validación de reglas biológicas (peso/edad)."
+    columns:
+      - name: animal_key
+        description: "Clave primaria única de la tabla creada con md5."
+        tests:
+          - unique
+          - not_null
+
+      - name: animal_id
+        description: "ID original del sistema de origen."
+        tests:
+          - not_null
+
+      - name: especie_animal
+        description: "Especie del animal corregida y estandarizada."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['PERRO', 'GATO', 'AVE', 'CONEJO', 'HAMSTER', 'EXÓTICO', 'DESCONOCIDO', 'ERROR']
+              quote: true
+
+      - name: raza_animal
+        description: "Raza del animal limpia tras cruzar con la Seed."
+        tests:
+          - not_null
+
+      - name: sexo_animal
+        description: "Género del animal."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['MACHO', 'HEMBRA', 'DESCONOCIDO']
+              quote: true
+
+      # No ponemos 'not_null' en fecha_nacimiento o peso_kg porque las convertimos a null si eran inválidas.
