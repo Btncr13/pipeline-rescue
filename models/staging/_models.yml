@@ -158,3 +158,36 @@ models:
         description: "Coste de la intervención en valor absoluto (siempre positivo)."
         tests:
           - not_null
+
+
+  - name: stg_rescue__donations
+    description: "Tabla de staging para las donaciones. Extrae datos del JSON y limpia importes y métodos de pago."
+    columns:
+      - name: donation_key
+        description: "Clave primaria subrogada única para la donación"
+        tests:
+          - unique
+          - not_null
+
+      - name: transaction_id
+        description: "ID natural de la transacción"
+        tests:
+          - unique
+          - not_null
+
+      - name: user_id
+        description: "ID del usuario que realiza la donación. Puede ser NULL si es anónima"
+
+      - name: donation_amount
+        description: "Importe neto de la donación (limpio de símbolos de moneda)"
+        tests:
+          - not_null
+
+      - name: payment_method
+        description: "Método de pago normalizado (TARJETA, PAYPAL)"
+
+      - name: campaign_name
+        description: "Nombre de la campaña a la que va dirigida la donación"
+
+      - name: campaign_budget
+        description: "Objetivo económico de la campaña asociada"
