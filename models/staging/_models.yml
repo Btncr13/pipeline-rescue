@@ -38,6 +38,7 @@ models:
 
       # No ponemos 'not_null' en fecha_nacimiento o peso_kg porque las convertimos a null si eran inválidas.
 
+  
   - name: stg_rescue__usuarios
     description: "Capa Staging de usuarios deduplicada por Email, Teléfono y Nombre. Incluye validación de rangos de edad"
     columns:
@@ -112,3 +113,48 @@ models:
       - name: ingested_at
         data_type: timestamp_ntz
         description: "Timestamp técnico de cuándo se cargó el dato en la capa Bronze"
+
+
+  - name: stg_rescue__visitas_medicas
+    description: "Tabla de staging para las visitas médicas. Limpia y normaliza motivos, diagnósticos y costes"
+    columns:    
+      - name: visita_medica_key
+        data_type: varchar
+        description: "Clave primaria subrogada única para cada versión de la visita."
+        tests:
+          - unique
+          - not_null
+
+      - name: visita_id
+        data_type: varchar
+        description: "Identificador natural de la visita procedente del origen."
+        tests:
+          - not_null
+
+      - name: animal_id
+        data_type: varchar
+        description: "ID del animal atendido. (Nota: Se permite que no cruce con la tabla animales para no perder el registro del gasto financiero)."
+
+      - name: sede_id
+        data_type: varchar
+        description: "ID de la sede o clínica veterinaria."
+
+      - name: fecha_visita
+        data_type: timestamp_ntz
+        description: "Fecha de la visita médica"
+        tests:
+          - not_null
+
+      - name: motivo_visita
+        data_type: varchar
+        description: "Motivo principal de la visita, normalizado a mayúsculas."
+
+      - name: diagnostico
+        data_type: varchar
+        description: "Diagnóstico médico de la visita."
+
+      - name: coste_visita
+        data_type: varchar
+        description: "Coste de la intervención en valor absoluto (siempre positivo)."
+        tests:
+          - not_null
