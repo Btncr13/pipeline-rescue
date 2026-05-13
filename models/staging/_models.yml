@@ -257,3 +257,48 @@ models:
 
       - name: longitude
         description: "Longitud geográfica para mapas"
+
+
+  - name: stg_rescue__movimientos
+    description: "Tabla transaccional (Hechos) que registra todos los eventos de los animales (entradas, salidas, traslados) con sus costes asociados."
+    columns:
+      - name: movimiento_key
+        description: "Clave primaria subrogada única."
+        tests:
+          - unique
+          - not_null
+
+      - name: movimiento_id
+        description: "ID natural del movimiento (MOV-XXXXX)."
+        tests:
+          - unique
+          - not_null
+
+      - name: animal_id
+        description: "Clave foránea que enlaza con el animal."
+        tests:
+          - not_null
+
+      - name: user_id
+        description: "Clave foránea que enlaza con el usuario (puede ser nulo en abandonos o rescates sin identificar)."
+
+      - name: sede_id
+        description: "Clave foránea que enlaza con la sede donde ocurre el evento."
+        tests:
+          - not_null
+
+      - name: tipo_evento
+        description: "Categoría principal del movimiento (ENTRADA, SALIDA, TRASLADO)."
+        tests:
+          - not_null
+
+      - name: metodo_evento
+        description: "Detalle específico del evento (Adopción, Fallecimiento, Nacimiento, etc.)."
+
+      - name: coste_operacion
+        description: "Coste económico asociado al movimiento."
+
+      - name: fecha_evento
+        description: "Fecha y hora exacta en la que se produjo el movimiento."
+        tests:
+          - not_null
