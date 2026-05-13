@@ -191,3 +191,37 @@ models:
 
       - name: campaign_budget
         description: "Objetivo económico de la campaña asociada"
+
+
+  - name: stg_rescue__sedes
+    description: "Tabla de staging para las sedes y refugios. Limpia nombres, normaliza teléfonos, corrige formatos de CP y estandariza estados booleanos."
+    columns:
+      - name: sede_key
+        description: "Clave primaria subrogada única para la sede"
+        tests:
+          - unique
+          - not_null
+
+      - name: sede_id
+        description: "ID natural de la sede (SD-XXX)"
+        tests:
+          - unique
+          - not_null
+
+      - name: nombre_sede
+        description: "Nombre del refugio o clínica, normalizado con mayúsculas capitales"
+        tests:
+          - not_null
+
+      - name: capacidad_maxima
+        description: "Capacidad total de animales"
+        tests:
+          - not_null
+
+      - name: codigo_postal
+        description: "Código postal"
+
+      - name: is_active
+        description: "Indica si la sede está operativa actualmente (booleano normalizado)"
+        tests:
+          - not_null
