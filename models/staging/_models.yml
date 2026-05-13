@@ -225,3 +225,35 @@ models:
         description: "Indica si la sede está operativa actualmente (booleano normalizado)"
         tests:
           - not_null
+
+
+  - name: stg_rescue__zip_codes
+    description: "Tabla maestra de códigos postales y coordenadas. Se usa como fuente de la verdad para validar las ubicaciones geográficas"
+    columns:
+      - name: zip_code_key
+        description: "Clave primaria subrogada única"
+        tests:
+          - unique
+          - not_null
+
+      - name: zip_code
+        description: "Código postal oficial de 5 dígitos"
+        tests:
+          - unique
+          - not_null
+
+      - name: city_name
+        description: "Nombre de la ciudad o municipio"
+        tests:
+          - not_null
+
+      - name: province_name
+        description: "Nombre de la provincia"
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Latitud geográfica para mapas"
+
+      - name: longitude
+        description: "Longitud geográfica para mapas"
