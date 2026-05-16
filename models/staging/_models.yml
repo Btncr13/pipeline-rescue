@@ -64,7 +64,7 @@ models:
         description: "Sexo del usuario"
         tests:
           - accepted_values:
-              values: ['MASCULINO', 'FEMENINO', 'DESCONOCIDO']
+            values: ['MASCULINO', 'FEMENINO', 'DESCONOCIDO']
 
       - name: fecha_nacimiento
         data_type: date

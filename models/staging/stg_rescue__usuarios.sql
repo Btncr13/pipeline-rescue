@@ -89,4 +89,4 @@ quality_filter as (
         and nombre_completo not like '%Prueba%'
 )
 
-select * from cleaned
+select * from quality_filter
