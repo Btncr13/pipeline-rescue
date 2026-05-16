@@ -55,23 +55,26 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_animales')
-              field: dim_animal_key
+              arguments: 
+                to: ref('dim_animales')
+                field: dim_animal_key
 
       - name: dim_usuario_key
         description: "Clave foránea que conecta con dim_usuarios. Puede ser nula en rescates anónimos."
         tests:
           - relationships:
-              to: ref('dim_usuarios')
-              field: dim_usuario_key
+              arguments: 
+                to: ref('dim_usuarios')
+                field: dim_usuario_key
 
       - name: dim_sede_key
         description: "Clave foránea que conecta con dim_sedes."
         tests:
           - not_null
           - relationships:
-              to: ref('dim_sedes')
-              field: dim_sede_key
+              arguments: 
+                to: ref('dim_sedes')
+                field: dim_sede_key
 
       - name: coste_operacion
         description: "Coste económico del movimiento."

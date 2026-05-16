@@ -20,8 +20,9 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['PERRO', 'GATO', 'AVE', 'CONEJO', 'HAMSTER', 'EXÓTICO', 'DESCONOCIDO', 'ERROR']
-              quote: true
+              arguments:
+                values: ['PERRO', 'GATO', 'AVE', 'CONEJO', 'HAMSTER', 'EXÓTICO', 'DESCONOCIDO', 'ERROR']
+                quote: true
 
       - name: raza_animal
         description: "Raza del animal limpia tras cruzar con la Seed"
@@ -33,8 +34,9 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['MACHO', 'HEMBRA', 'DESCONOCIDO']
-              quote: true
+              arguments: 
+                values: ['MACHO', 'HEMBRA', 'DESCONOCIDO']
+                quote: true
 
       # No ponemos 'not_null' en fecha_nacimiento o peso_kg porque las convertimos a null si eran inválidas.
 
@@ -64,7 +66,8 @@ models:
         description: "Sexo del usuario"
         tests:
           - accepted_values:
-            values: ['MASCULINO', 'FEMENINO', 'DESCONOCIDO']
+              arguments: 
+                values: ['MASCULINO', 'FEMENINO', 'DESCONOCIDO']
 
       - name: fecha_nacimiento
         data_type: date
@@ -93,8 +96,9 @@ models:
         description: "Rol principal del usuario en el sistema"
         tests:
           - accepted_values:
-              values: ['ADOPTANTE', 'VOLUNTARIO', 'DONANTE', 'SIN TIPO']
-              quote: true
+              arguments: 
+                values: ['ADOPTANTE', 'VOLUNTARIO', 'DONANTE', 'SIN TIPO']
+                quote: true
 
       - name: canal_captacion
         data_type: varchar

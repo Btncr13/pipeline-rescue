@@ -6,11 +6,11 @@ with source as (
 ),
 
 map_razas as (
-    select * from {{ ref('map_razas') }}
+    select * from {{ ref('stg_rescue__map_razas') }}
 ),
 
 map_reglas as (
-    select * from {{ ref('map_especies_reglas') }}
+    select * from {{ ref('stg_rescue__map_especies_reglas') }}
 ),
 
 -- BLOQUE 1: Limpieza básica y pre-procesamiento
