@@ -1,0 +1,84 @@
+version: 2
+
+models:
+  - name: dim_usuarios
+    description: "Dimensión de Usuarios. Contiene el Golden Record (deduplicado) y datos geográficos enriquecidos."
+    columns:
+      - name: dim_usuario_key
+        description: "Clave primaria subrogada única para esta dimensión."
+        tests:
+          - unique
+          - not_null
+
+      - name: natural_user_id
+        description: "ID natural del sistema de origen."
+        tests:
+          - not_null
+
+      - name: email
+        description: "Correo electrónico del usuario."
+
+      - name: ciudad
+        description: "Ciudad de residencia enriquecida desde la tabla de códigos postales."
+
+
+  - name: dim_animales
+    description: "Dimensión de Animales con datos biológicos estandarizados."
+    columns:
+      - name: dim_animal_key
+        description: "Clave primaria subrogada."
+        tests:
+          - unique
+          - not_null
+
+
+  - name: dim_sedes
+    description: "Dimensión de Sedes y centros de rescate."
+    columns:
+      - name: dim_sede_key
+        description: "Clave primaria subrogada."
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_movimientos
+    description: "Tabla de hechos incremental de movimientos. Registra cada evento (entrada, salida, traslado) y su coste asociado."
+    columns:
+      - name: movimiento_key
+        description: "Clave primaria subrogada de la tabla de hechos."
+        tests:
+          - unique
+          - not_null
+
+      - name: dim_animal_key
+        description: "Clave foránea que conecta con dim_animales."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_animales')
+              field: dim_animal_key
+
+      - name: dim_usuario_key
+        description: "Clave foránea que conecta con dim_usuarios. Puede ser nula en rescates anónimos."
+        tests:
+          - relationships:
+              to: ref('dim_usuarios')
+              field: dim_usuario_key
+
+      - name: dim_sede_key
+        description: "Clave foránea que conecta con dim_sedes."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_sedes')
+              field: dim_sede_key
+
+      - name: coste_operacion
+        description: "Coste económico del movimiento."
+        tests:
+          - not_null
+
+      - name: fecha_evento
+        description: "Fecha y hora del evento. Se usa para la carga incremental."
+        tests:
+          - not_null

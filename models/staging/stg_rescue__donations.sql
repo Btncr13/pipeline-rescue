@@ -31,8 +31,8 @@ cleaned as (
         donation_date,
 
         -- MÉTRICAS Y DIMENSIONES
-        -- Extraemos el importe
-        cast(replace(cast(payload:importe as string), '€', '') as decimal(10,2)) as donation_amount,
+        -- Extraemos y limpiamos el importe con nuestra macro
+        {{ clean_money('payload:importe') }} as donation_amount,
         
         -- Limpiamos el método de pago: quitamos espacios (trim) y pasamos a mayúsculas
         upper(trim(cast(payload:metodo_pago as string))) as payment_method,

@@ -17,7 +17,7 @@ map_reglas as (
 cleaned_base as (
     select
         s.animal_key,
-        s.id_animal as animal_id,
+        upper(replace(s.id_animal, ' ', '')) as animal_id,
         coalesce(upper(trim(s.nombre)), 'SIN NOMBRE') as nombre_animal,
 
         -- 1. Clasificación de especie original

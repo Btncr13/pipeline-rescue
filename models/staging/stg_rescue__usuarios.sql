@@ -87,42 +87,6 @@ quality_filter as (
         -- 2. Eliminamos nombres de prueba conocidos (Case Insensitive)
         and lower(nombre_completo) not in ('maria final', 'test', 'usuario prueba')
         and nombre_completo not like '%Prueba%'
-),
-
--- ---------------------------------------------------------
--- SISTEMA DE DEDUPLICACIÓN JERÁRQUICA
--- ---------------------------------------------------------
-
--- PASO 1: Deduplicar por EMAIL
-dedup_email as (
-    select * from cleaned
-    qualify row_number() over (
-        partition by email 
-        order by user_id desc
-    ) = 1 
-    or email is null
-),
-
--- PASO 2: Deduplicar por TELÉFONO
-dedup_phone as (
-    select * from dedup_email
-    qualify row_number() over (
-        partition by telefono 
-        order by user_id desc
-    ) = 1 
-    or telefono is null
-),
-
--- PASO 3: Deduplicar por NOMBRE + APELLIDO + FECHA NACIMIENTO
-final_deduplicated as (
-    select * from dedup_phone
-    qualify row_number() over (
-        partition by 
-            split_part(nombre_completo, ' ', 1),
-            split_part(nombre_completo, ' ', 2),
-            fecha_nacimiento 
-        order by user_id desc 
-    ) = 1
 )
 
-select * from final_deduplicated
+select * from cleaned
