@@ -85,3 +85,18 @@ models:
         description: "Fecha y hora del evento. Se usa para la carga incremental."
         tests:
           - not_null
+
+  - name: fct_donaciones
+    description: "Tabla de hechos de donaciones con carga incremental."
+    columns:
+      - name: donation_key
+        tests:
+          - unique
+          - not_null
+      - name: usuario_key
+        tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('dim_usuarios')
+                field: dim_usuario_key

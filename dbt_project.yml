@@ -51,6 +51,11 @@ seeds:
   pipeline_rescue:
     +database: DEV_BRONZE
     +schema: seeds
+    espana_zip_codes:
+      +column_types:
+        codigo_postal: varchar(5)
+
+
 
 snapshots:
   pipeline_rescue:

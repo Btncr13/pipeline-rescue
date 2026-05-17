@@ -46,7 +46,7 @@ final_dimension as (
         a.fecha_alta_at,
         
         -- Geografía Enriquecida (Si no cruza, ponemos 'Desconocido' para evitar nulos en Power BI)
-        a.codigo_postal,
+        coalesce(z.zip_code, 'Inválido') as codigo_postal,
         coalesce(z.city_name, 'Desconocido') as ciudad,
         coalesce(z.province_name, 'Desconocido') as provincia,
         z.latitude,
@@ -55,6 +55,20 @@ final_dimension as (
     from deduplicated_adopters a
     left join zip_codes z 
         on a.codigo_postal = z.zip_code
-)
+),
 
+dummy_record as (
+    select 
+        '-1' as dim_usuario_key,
+        'Desconocido' as natural_user_id,
+        'Donante Anónimo' as nombre_completo,
+        'N/A' as genero_usuario, null as fecha_nacimiento,
+        'N/A' as email, 'N/A' as telefono, 'N/A' as profesion,
+        'N/A' as tipo_usuario, 'N/A' as canal_captacion,
+        false as es_socio, null as fecha_alta_at,
+        'N/A' as codigo_postal, 'Desconocido' as ciudad,
+        'Desconocido' as provincia, null as latitude, null as longitude
+)
 select * from final_dimension
+union all
+select * from dummy_record

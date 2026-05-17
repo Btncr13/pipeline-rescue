@@ -37,6 +37,9 @@ select
     coalesce(a.dim_animal_key, {{ dbt_utils.generate_surrogate_key(["'-1'"]) }}) as dim_animal_key,
     u.dim_usuario_key,
     s.dim_sede_key,
+    
+    --  NUEVA CLAVE FORÁNEA PARA LA FECHA (Mapea con el date_day de dbt_date)
+    m.fecha_evento::date as dim_fecha_key, 
 
     -- IDs Naturales y Degeneradas
     m.movimiento_id as natural_movimiento_id,

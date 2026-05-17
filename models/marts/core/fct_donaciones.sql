@@ -1,0 +1,23 @@
+{{ config(materialized='incremental', unique_key='donation_key') }}
+
+WITH donaciones AS (
+    SELECT * FROM {{ ref('stg_rescue__donations') }}
+),
+usuarios AS (
+    SELECT * FROM {{ ref('dim_usuarios') }}
+)
+
+SELECT
+    d.donation_key,
+    d.transaction_id,
+    COALESCE(u.dim_usuario_key, '-1') AS usuario_key, 
+    d.donation_date AS fecha_key,
+    d.donation_amount AS importe,
+    d.payment_method AS metodo_pago,
+    d.donation_at
+FROM donaciones d
+LEFT JOIN usuarios u ON d.user_id = u.natural_user_id
+
+{% if is_incremental() %}
+  WHERE d.donation_at > (SELECT MAX(donation_at) FROM {{ this }})
+{% endif %}
