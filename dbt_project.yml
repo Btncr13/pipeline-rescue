@@ -2,7 +2,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'my_new_project'
+name: 'pipeline_rescue'
 version: '1.0.0'
 config-version: 2
 
@@ -36,7 +36,28 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 models:
-  my_new_project:
-    # Applies to all files under models/example/
-    example:
+  pipeline_rescue:
+    staging:
+      +database: DEV_SILVER
+      +schema: staging
+      +materialized: view
+
+    marts:
+      +database: DEV_GOLD
+      +schema: core
       +materialized: table
+    
+seeds:
+  pipeline_rescue:
+    +database: DEV_BRONZE
+    +schema: seeds
+    espana_zip_codes:
+      +column_types:
+        codigo_postal: varchar(5)
+
+
+
+snapshots:
+  pipeline_rescue:
+    +database: DEV_BRONZE
+    +schema: snapshots

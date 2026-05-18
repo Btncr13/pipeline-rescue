@@ -1,0 +1,28 @@
+version: 2                                        # Versión del estándar de dbt
+
+sources:                                          # Inicio de la definición de fuentes
+  - name: rescue                                  # Nombre lógico de la fuente para dbt
+    database: DEV_BRONZE                          # Base de datos en Snowflake
+    schema: RAW                                   # Esquema en Snowflake
+
+    config:                                       # Bloque de configuración de metadatos
+      loaded_at_field: _LOADED_AT                 # La columna que añadimos para el freshness
+      freshness:                                  # Definición de tiempos de frescura
+        warn_after: {count: 24, period: hour}     # Alerta si pasa un día sin datos nuevos
+        error_after: {count: 48, period: hour}    # Error si pasan dos días
+    
+    tables:                                       # Tablas detectadas por codegen
+      - name: adopters
+        description: "Datos crudos de personas" 
+      - name: animales                         
+        description: "Datos crudos de animales"
+      - name: donations                        
+        description: "Datos crudos de dinero"
+      - name: movimientos                      
+        description: "Datos crudos de traslados"
+      - name: sedes                            
+        description: "Datos crudos de centros"
+      - name: visitas_medicas                  
+        description: "Datos crudos de salud"
+      - name: zip_codes                        
+        description: "Datos de geografía"
