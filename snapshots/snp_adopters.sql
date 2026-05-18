@@ -2,7 +2,7 @@
 
 {{
     config(
-        target_database=('PROD_BRONZE' if target.name == 'PROD' else 'DEV_BRONZE'),
+        target_database=env_var('DBT_BRONZE_DB'),
         target_schema='snapshots',
         unique_key='user_key',
         strategy='check',
