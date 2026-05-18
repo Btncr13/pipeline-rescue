@@ -38,26 +38,24 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   pipeline_rescue:
     staging:
-      +database: "{{ 'PROD_SILVER' if target.name == 'PROD' else 'DEV_SILVER' }}"
+      +database: "{{ env_var('DBT_SILVER_DB') }}"
       +schema: staging
       +materialized: view
 
     marts:
-      +database: "{{ 'PROD_GOLD' if target.name == 'PROD' else 'DEV_GOLD' }}"
+      +database: "{{ env_var('DBT_GOLD_DB') }}"
       +schema: core
       +materialized: table
     
 seeds:
   pipeline_rescue:
-    +database: "{{ 'PROD_BRONZE' if target.name == 'PROD' else 'DEV_BRONZE' }}"
+    +database: "{{ env_var('DBT_BRONZE_DB') }}"
     +schema: seeds
     espana_zip_codes:
       +column_types:
         codigo_postal: varchar(5)
 
-
-
 snapshots:
   pipeline_rescue:
-    +database: "{{ 'PROD_BRONZE' if target.name == 'PROD' else 'DEV_BRONZE' }}"
+    +database: "{{ env_var('DBT_BRONZE_DB') }}"
     +schema: snapshots
