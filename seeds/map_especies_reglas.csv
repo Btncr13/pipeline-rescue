@@ -1,0 +1,9 @@
+especie,peso_min_kg,peso_max_kg,edad_maxima_biologica
+PERRO,0.5,120,25
+GATO,0.2,20,25
+CONEJO,0.1,15,15
+CABALLO,40.0,1200,45
+HAMSTER,0.01,1.0,5
+AVE,0.01,5.0,80
+EXÓTICO,0.01,1000,80
+DESCONOCIDO,0.01,1000,100
