@@ -13,4 +13,5 @@ env/
 
 # Archivos de datos locales (NUNCA subir CSVs crudos a Git)
 *.csv
+!seeds/*.csv
 *.gz
