@@ -2,7 +2,7 @@
 
 {{
     config(
-        target_database=target.database,
+        target_database=('PROD_BRONZE' if target.name == 'PROD' else 'DEV_BRONZE'),
         target_schema='snapshots',
         unique_key='user_key',
         strategy='check',
