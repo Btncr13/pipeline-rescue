@@ -77,10 +77,6 @@ cleaned as (
             when '52' then 'Melilla'
             else 'Desconocido'
         end as province_name,
-        
-        -- COORDENADAS
-        cast(null as float) as latitude,
-        cast(null as float) as longitude
 
     from deduplicated -- 2. CAMBIADO AQUÍ: Ahora lee de la lista ya limpia sin duplicados
 )

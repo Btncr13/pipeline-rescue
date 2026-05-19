@@ -10,7 +10,7 @@ with adopters as (
 ),
 
 zip_codes as (
-    select * from {{ ref('stg_rescue__zip_codes') }}
+    select * from {{ ref('stg_rescue__espana_zip_codes') }}
 ),
 
 -- 1. REGLA DE NEGOCIO: Deduplicación (Golden Record)
@@ -49,8 +49,6 @@ final_dimension as (
         coalesce(z.zip_code, 'Inválido') as codigo_postal,
         coalesce(z.city_name, 'Desconocido') as ciudad,
         coalesce(z.province_name, 'Desconocido') as provincia,
-        z.latitude,
-        z.longitude
         
     from deduplicated_adopters a
     left join zip_codes z 
@@ -67,7 +65,7 @@ dummy_record as (
         'N/A' as tipo_usuario, 'N/A' as canal_captacion,
         false as es_socio, null as fecha_alta_at,
         'N/A' as codigo_postal, 'Desconocido' as ciudad,
-        'Desconocido' as provincia, null as latitude, null as longitude
+        'Desconocido' as provincia
 )
 select * from final_dimension
 union all
