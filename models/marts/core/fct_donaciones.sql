@@ -15,11 +15,11 @@ SELECT
     {{ dbt_utils.generate_surrogate_key(['d.campaign_id']) }} as campana_key,
     d.donation_date AS fecha_key,
     d.donation_amount AS importe,
-    d.payment_method AS metodo_pago,
-    d.donation_at
+    d.payment_method AS metodo_pago
+
 FROM donaciones d
 LEFT JOIN usuarios u ON d.user_id = u.natural_user_id
 
 {% if is_incremental() %}
-  WHERE d.donation_at > (SELECT MAX(donation_at) FROM {{ this }})
+  WHERE d.donation_at > (SELECT MAX(fecha_key) FROM {{ this }})
 {% endif %}
