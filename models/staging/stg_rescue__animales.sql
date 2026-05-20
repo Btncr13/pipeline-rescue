@@ -28,7 +28,7 @@ cleaned_base as (
             when upper(trim(s.especie)) like 'CON%' then 'CONEJO'
             when upper(trim(s.especie)) like 'HAMS%' then 'HAMSTER'
             when upper(trim(s.especie)) = 'PEZ' or upper(trim(s.especie)) like 'TORT%' or upper(trim(s.especie)) like 'DRAG%' then 'EXÓTICO'
-            when upper(trim(s.especie)) in ('T-REX', 'UNICORNIO') then 'ERROR'
+            when upper(trim(s.especie)) in ('T-REX', 'UNICORNIO') then 'DESCONOCIDO'
             else coalesce(upper(trim(s.especie)), 'DESCONOCIDO')
         end as especie_animal_origen,
 

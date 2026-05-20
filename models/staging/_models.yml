@@ -231,7 +231,7 @@ models:
           - not_null
 
 
-  - name: stg_rescue__zip_codes
+  - name: stg_rescue__espana_zip_codes
     description: "Tabla maestra de códigos postales y coordenadas. Se usa como fuente de la verdad para validar las ubicaciones geográficas"
     columns:
       - name: zip_code_key

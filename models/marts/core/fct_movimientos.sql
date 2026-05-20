@@ -50,10 +50,8 @@ select
     m.coste_operacion,
 
     -- Fechas
-    m.fecha_evento,
+    m.fecha_evento
     
-    current_timestamp() as dbt_processed_at
-
 from movimientos m
 left join dim_animales a on m.animal_id = a.natural_animal_id
 left join dim_usuarios u on m.user_id = u.natural_user_id

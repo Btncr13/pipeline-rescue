@@ -26,8 +26,7 @@ final_dimension as (
         fecha_nacimiento,
         peso_kg,
         tiene_microchip,
-        condicion_ingreso,
-        actualizado_en_origen_at
+        condicion_ingreso
     from staging
 ),
 
@@ -44,8 +43,7 @@ unknown_record as (
         null as fecha_nacimiento,
         null as peso_kg,
         null as tiene_microchip,
-        'Error en Origen' as condicion_ingreso,
-        current_timestamp() as actualizado_en_origen_at
+        'Error en Origen' as condicion_ingreso
 )
 
 -- Unimos la tabla real con nuestro registro salvavidas

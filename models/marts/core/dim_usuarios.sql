@@ -10,7 +10,7 @@ with adopters as (
 ),
 
 zip_codes as (
-    select * from {{ ref('stg_rescue__zip_codes') }}
+    select * from {{ ref('stg_rescue__espana_zip_codes') }}
 ),
 
 -- 1. REGLA DE NEGOCIO: Deduplicación (Golden Record)
@@ -30,14 +30,9 @@ final_dimension as (
         
         -- IDs y Datos Personales
         a.user_id as natural_user_id,
-        a.nombre_completo,
         a.genero_usuario,
         a.fecha_nacimiento,
-        
-        -- Contacto
-        a.email,
-        a.telefono,
-        
+         
         -- Perfil en el Refugio
         a.profesion,
         a.tipo_usuario,
@@ -48,9 +43,7 @@ final_dimension as (
         -- Geografía Enriquecida (Si no cruza, ponemos 'Desconocido' para evitar nulos en Power BI)
         coalesce(z.zip_code, 'Inválido') as codigo_postal,
         coalesce(z.city_name, 'Desconocido') as ciudad,
-        coalesce(z.province_name, 'Desconocido') as provincia,
-        z.latitude,
-        z.longitude
+        coalesce(z.province_name, 'Desconocido') as provincia
         
     from deduplicated_adopters a
     left join zip_codes z 
@@ -61,13 +54,11 @@ dummy_record as (
     select 
         '-1' as dim_usuario_key,
         'Desconocido' as natural_user_id,
-        'Donante Anónimo' as nombre_completo,
-        'N/A' as genero_usuario, null as fecha_nacimiento,
-        'N/A' as email, 'N/A' as telefono, 'N/A' as profesion,
+        'N/A' as genero_usuario, null as fecha_nacimiento, 'N/A' as profesion,
         'N/A' as tipo_usuario, 'N/A' as canal_captacion,
         false as es_socio, null as fecha_alta_at,
         'N/A' as codigo_postal, 'Desconocido' as ciudad,
-        'Desconocido' as provincia, null as latitude, null as longitude
+        'Desconocido' as provincia
 )
 select * from final_dimension
 union all
