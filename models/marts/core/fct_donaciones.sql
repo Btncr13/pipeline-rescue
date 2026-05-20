@@ -20,6 +20,19 @@ SELECT
 FROM donaciones d
 LEFT JOIN usuarios u ON d.user_id = u.natural_user_id
 
+
+
+
+
+
 {% if is_incremental() %}
-  WHERE d.donation_at > (SELECT MAX(fecha_key) FROM {{ this }})
+  WHERE d.donation_date > (SELECT MAX(fecha_key) FROM {{ this }})
 {% endif %}
+
+
+
+
+
+
+
+
