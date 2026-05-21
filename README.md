@@ -36,7 +36,7 @@ Este sistema centraliza, limpia y gobierna los datos en la nube para dar respues
 
 ---
 
-## � Arquitectura del Pipeline (Medallion)
+## 📐 Arquitectura del Pipeline (Medallion)
 
 <p align="center">
   <img src="img/arquitectura.jfif" width="800" alt="Diagrama de Arquitectura">
@@ -44,12 +44,6 @@ Este sistema centraliza, limpia y gobierna los datos en la nube para dar respues
 
 1. 🥉 **Capa Bronze (RAW) - "Ingesta Defensiva":** Ingesta mediante un script en **Python** (`_ingestion/ingesta.py`). Se aplica una **"VARCHAR Strategy"**, cargando todo como texto para blindar la ejecución contra fallos de tipado desde el origen, y se inyecta un timestamp de auditoría (`_loaded_at`).
 2. 🥈 **Capa Silver (Staging) - "Data Cleansing":** Tipado fuerte y limpieza en **dbt**. Incluye aplanamiento de datos anidados (JSON), estandarización de booleanos sucios (`'sí', 't', '1' -> TRUE`), corrección de métricas negativas mediante `ABS()`, funciones reutilizables (**Macros**) y uso de **Seeds** como *Fuente de la Verdad* (Master Data).
-
-<p align="center">
-  <img src="img/slv.jpg" width="45%" alt="Diagrama Silver">
-  &nbsp; &nbsp; &nbsp;
-  <img src="img/macro.jpg" width="45%" alt="Uso de Macros en dbt">
-</p>
 
 3. 🥇 **Capa Gold (Marts / Core) - "Orientación a Negocio":** Modelo dimensional (Esquema en Estrella). Implementación de carga incremental para tablas de hechos y uso de paquetes de dbt para generar una **Dimensión Fecha** dinámica, esencial para el análisis de series temporales.
 
@@ -75,9 +69,20 @@ pipeline-rescue/
 
 ---
 
-## ⚙️ Modelado de Datos (Capa Analítica)
+## ⚙️ Transformación y Modelado de Datos
 
-El data warehouse está diseñado mediante un **esquema en estrella** en la capa `marts` para optimizar las consultas analíticas:
+### 🥈 Capa Plata (Staging y Limpieza)
+En esta etapa se procesan los datos crudos para prepararlos para el análisis. Se tipan los campos, se normalizan textos y booleanos, se aplanan JSONs y se aplican **Macros** (código SQL reutilizable) para mantener el código DRY (*Don't Repeat Yourself*).
+
+<p align="center">
+  <img src="img/slv.jpg" width="45%" alt="Diagrama Silver">
+  &nbsp; &nbsp; &nbsp;
+  <img src="img/macro.jpg" width="45%" alt="Uso de Macros en dbt">
+</p>
+
+### 🥇 Capa Oro (Esquema en Estrella)
+El data warehouse final está diseñado mediante un **esquema en estrella** en la capa `marts` para optimizar las consultas analíticas de negocio:
+
 
 <p align="center">
   <img src="img/gold.jpg" width="800" alt="Diagrama Gold - Esquema en Estrella">
