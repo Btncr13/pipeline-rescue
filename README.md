@@ -75,9 +75,7 @@ pipeline-rescue/
 En esta etapa se procesan los datos crudos para prepararlos para el análisis. Se tipan los campos, se normalizan textos y booleanos, se aplanan JSONs y se aplican **Macros** (código SQL reutilizable) para mantener el código DRY (*Don't Repeat Yourself*).
 
 <p align="center">
-  <img src="img/slv.jpg" width="45%" alt="Diagrama Silver">
-  &nbsp; &nbsp; &nbsp;
-  <img src="img/macro.jpg" width="45%" alt="Uso de Macros en dbt">
+  <img src="img/slv.jpg" width="800" alt="Diagrama Silver">
 </p>
 
 ### 🥇 Capa Oro (Esquema en Estrella)
@@ -96,10 +94,6 @@ Contienen el contexto descriptivo. Incluyen lógica avanzada como la creación d
 
 ### 📊 Tablas de Hechos (`fct_`)
 Almacenan las métricas y eventos. Están configuradas de forma **incremental** en dbt para procesar únicamente los datos nuevos de forma eficiente y evitar cruces costosos de datos históricos.
-
-<p align="center">
-  <img src="img/incremental.jpg" width="800" alt="Carga Incremental en dbt">
-</p>
 
 *   `fct_movimientos`: Traslados y operaciones.
 *   `fct_donaciones`: Registro de aportaciones económicas (extraídas de un payload JSON anidado).
@@ -203,10 +197,6 @@ dbt test
 ## 🧪 Calidad de Datos y Tests
 
 El proyecto utiliza los tests nativos de dbt y tests singulares (`tests/`) para asegurar la fiabilidad. Un ejemplo es el test `assert_movimientos_coste_positivo` que bloquea y alerta si se registra en Snowflake una operación con coste negativo. También se hace uso del paquete `dbt_utils` para garantizar la generación correcta de *Surrogate Keys*.
-
-<p align="center">
-  <img src="img/testsingular.jpg" width="800" alt="Test Singular SQL">
-</p>
 
 ---
 
