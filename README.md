@@ -142,12 +142,17 @@ Además de los retos mencionados, se implementaron de manera transversal las sig
 
 El ciclo de vida del pipeline se gestiona bajo filosofía DataOps para entornos escalables:
 
-*   **Enrutamiento Dinámico y Entornos Aislados:** Uso de variables de entorno (`{{ env_var('DBT_SILVER_DB') }}`) en `dbt_project.yml` para desplegar dinámicamente en bases de datos de DEV o PROD usando el mismo código fuente, previniendo accidentes en producción.
-*   **Orquestación Automatizada:** Ejecución de transformaciones gestionada de forma autónoma mediante **Jobs de dbt Cloud** (`dbt run`, `dbt test`).
-*   **Monitoreo de Frescura:** Verificación automatizada (`source freshness`) en la capa RAW para disparar alertas si los datos operativos se retrasan más de 24 horas.
+* **Enrutamiento Dinámico y Entornos Aislados:** Uso de variables de entorno (`{{ env_var('DBT_SILVER_DB') }}`) en `dbt_project.yml` para desplegar dinámicamente en bases de datos de DEV o PROD usando el mismo código fuente, previniendo accidentes en producción.
+* **Orquestación Automatizada:** Ejecución de transformaciones gestionada de forma autónoma mediante **Jobs de dbt Cloud**. El entorno de producción asegura la frescura de datos (`dbt source freshness`), materializa los modelos (`dbt run`) y ejecuta las validaciones de calidad (`dbt test`) de forma secuencial y exitosa.
+* **Cargas Incrementales Optimizadas:** Para las tablas de hechos de gran volumen, el pipeline utiliza estrategias incrementales (tipo `merge`). Como se aprecia en los logs de la captura inferior, el job es capaz de identificar e insertar únicamente los registros nuevos o actualizados (ej. procesando un delta de 5 filas), evitando reprocesar todo el histórico de datos.
+* **Monitoreo de Frescura:** Verificación automatizada (`source freshness`) en la capa RAW para disparar alertas si los datos operativos se retrasan más de 24 horas.
 
 <p align="center">
   <img src="img/jobprod.jpg" width="800" alt="Job de Producción en dbt Cloud">
+</p>
+
+<p align="center">
+  <img src="img/pruebajobincremental.jpg" width="800" alt="Job de Producción en dbt Cloud mostrando ejecución exitosa y carga incremental de 5 registros">
 </p>
 
 ---
