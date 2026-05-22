@@ -55,6 +55,7 @@ Este sistema centraliza, limpia y gobierna los datos en la nube para dar respues
 pipeline-rescue/
 ├── _ingestion/             # Scripts de ingesta de datos
 │   └── ingesta.py          # Script de Python que sube CSVs locales a Snowflake
+├── macros/                 # Macros personalizadas (funciones reutilizables)
 ├── models/                 # Modelos de dbt
 │   ├── staging/            # Capa SILVER (Limpieza, normalización y parseo)
 │   │   ├── _sources.yml    # Definición de fuentes y métricas de frescura (freshness)
@@ -62,9 +63,11 @@ pipeline-rescue/
 │   └── marts/core/         # Capa GOLD (Esquema en Estrella)
 │       ├── dim_*.sql       # Dimensiones (Usuarios, Animales, Sedes...)
 │       └── fct_*.sql       # Tablas de Hechos Incrementales (Movimientos, Donaciones)
+├── seeds/                  # Archivos CSV estáticos (mapeos, datos semilla)
 ├── tests/                  # Pruebas personalizadas de dbt
 │   └── assert_movimientos_coste_positivo.sql # Reglas de negocio críticas
-└── README.md               # Documentación del proyecto
+├── packages.yml            # Declaración de dependencias y paquetes de dbt
+└── dbt_project.yml         # Configuración principal del proyecto dbt
 ```
 
 ---
